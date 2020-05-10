@@ -4,46 +4,37 @@ var { google } = require("googleapis");
 var electron = require("electron").remote;
 var request = require("request");
 
-var calendar = google.calendar("v3");
+const { OAuth2 } = google.auth;
+
 //Default location for folder
 var defaultLocation = electron.app.getPath("documents");
 
 async function setupAuth() {
-
-
-	let auth = new google.auth.OAuth2(
+	const oAuth2Client = new OAuth2(
 		"294965687317-213bivaqe8jlsivc092d9uu626duskkt.apps.googleusercontent.com",
-		"QAnJ-iLuAgDj_fAx5uCvM_CF",
-		"urn:ietf:wg:oauth:2.0:oob"
+		"QAnJ-iLuAgDj_fAx5uCvM_CF"
 	);
 
-	fs.readFile(defaultLocation + "\\LectioToCal\\token.json", (err, result) => {
-		fileContent = JSON.parse(result)
+	fs.readFile(
+		defaultLocation + "\\LectioToCal\\token.json",
+		(err, result) => {
+			fileContent = JSON.parse(result);
 
+			oAuth2Client.setCredentials({
+				refresh_token: fileContent['refresh_token'],
+			});
+		}
+	);
 
-		let credentials = {
-			access_token: fileContent['access_token'],
-			token_type: fileContent['token_type'], // mostly Bearer
-			refresh_token: fileContent['refresh_token'],
-			expiry_date: fileContent['expiry_date'],
-			scope: fileContent['scope']
-		};
-
-		auth.setCredentials(credentials);
-	});
-
-	console.log(auth);
-
-
-	return auth;
+	return oAuth2Client;
 }
 
 async function getCalendar() {
-	authUser = await setupAuth();
+	var authUser = await setupAuth();
 
-	const calendar = google.calendar({ version: "v3", auth: authUser });
+	var calendar = google.calendar({ version: "v3", auth: authUser });
 
-	console.log(calendar)
+	console.log(calendar);
 
 	calendar.events.list(
 		{
