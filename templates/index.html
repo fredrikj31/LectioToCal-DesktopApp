@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>Lectio To Calendar</title>
+	<!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
+	<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+
+	<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body class="bg-white" onload="checkTokenFile()">
+	<div class="jumbotron text-center bg-info text-light" style="border-radius: 0;">
+		<h1>Lectio To Calendar</h1>
+		<p>Get your lectio schedule into you Google calender with 1 click.</p>
+	</div>
+
+	<div class="text-center" id="connectCalendar" style="display: none;">
+		<h4>There was not found a linked calendar on this computer.</h4>
+		<h5>Therefore you will need to link it, you can do it below with 1 click.</h5>
+		<br>
+		<br>
+		<button onclick="linkCalendar()" class="btn btn-primary">Link your calender</button>
+	</div>
+
+	<div class="text-center" id="codeForm" style="display: none;">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-3"></div>
+				<div class="col-sm-6">
+					<h4>Enter the confirm code from Googles website.</h4>
+					<br>
+					<div class="form-group">
+						<label for="code">Confirm Code:</label>
+						<input type="text" class="form-control text-center" id="code" placeholder="Confirm Code">
+					</div>
+					<button onclick="enterCode()" class="btn btn-primary">Submit Code</button>
+				</div>
+				<div class="col-sm-3"></div>
+			</div>
+		</div>
+	</div>
+
+	<div id="loginForm" style="display: none;">
+		<div class="container">
+			<!-- Stepper -->
+			<div class="row">
+				<div class="col">
+					<div class="p-3 rounded-pill text-white text-center" id="firstStep" style="background-color: #343A40;"><span
+							class="badge badge-info">1</span> Login with your details.</div>
+				</div>
+				<div class="col">
+					<div class="p-3 rounded-pill text-white text-center" id="secondStep" style="background-color: #6C757D;"><span
+							class="badge badge-info">2</span> Getting data from API.</div>
+				</div>
+				<div class="col">
+					<div class="p-3 rounded-pill text-white text-center" id="thirdStep" style="background-color: #6C757D;"><span
+							class="badge badge-info">3</span> Sync with your calendar.</div>
+				</div>
+			</div>
+			<hr>
+			<div class="row">
+				<div class="col-sm-3">
+				</div>
+				<div class="col-sm-6 text-center">
+					<!-- Feedback -->
+					<div id="feedback"></div>
+					<!-- Form -->
+					<div id="submitForm">
+						<div class="form-group">
+							<label for="username">Username:</label>
+							<input type="text" class="form-control text-center" id="username"
+								placeholder="Lectio username" name="username">
+						</div>
+						<div class="form-group">
+							<label for="password">Password:</label>
+							<input type="password" class="form-control text-center" id="password"
+								placeholder="Lectio password" name="password">
+						</div>
+						<div class="form-group">
+							<label for="type">Person Type:</label>
+							<select class="form-control" id="type">
+								<option value="Student">Student</option>
+								<option value="Teacher">Teacher</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="schoolId">School:</label>
+							<select class="form-control" id="schoolId">
+							</select>
+						</div>
+						<button onclick="submitForm()" class="btn btn-primary">Sync with Calendar</button>
+					</div>
+				</div>
+				<div class="col-sm-3">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Loading for request -->
+	<div class="text-center" id="apiLoading" style="display: none;">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-3"></div>
+				<div class="col-sm-6">
+					<h3>Getting data from API...</h3>
+					<br>
+					<div class="spinner-border spinner-border-lg text-info"></div>
+				</div>
+				<div class="col-sm-3"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Sending to Calendar -->
+	<div class="text-center" id="calendarLoading" style="display: none;">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-3"></div>
+				<div class="col-sm-6">
+					<h3>Uploading to Calendar</h3>
+					<br>
+					<div class="progress" style="height:30px">
+						<div class="progress-bar progress-bar-striped progress-bar-animated bg-info"
+							style="width:30%; height:30px; font-size: 16px;">30%</div>
+					</div>
+				</div>
+				<div class="col-sm-3"></div>
+			</div>
+		</div>
+	</div>
+
+
+	<footer class="footer">
+		<div class="container">
+			<p class="text-muted">Support Email: <span class="text-primary"><a
+						href="mailto:fredrik1206@gmail.com?subject=Lectio til Kalender - Problem">fredrik1206@gmail.com</a></span>
+			</p>
+		</div>
+	</footer>
+
+	<!-- Bootstrap JavaScript -->
+	<!--
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+	-->
+
+	<!-- Google Auth (MUST BE THE FIRST) -->
+	<script src="../assets/js/googleAuth.js"></script>
+	<!-- Form Validation -->
+	<script src="../assets/js/syncEvents.js"></script>
+	<!-- Get Schools -->
+	<script src="../assets/js/getSchools.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+{
+	"name": "lectiotocal-desktopapp",
+	"version": "1.0.0",
+	"description": "A desktop application that allows you to get your lectio schedule to google calendar",
+	"main": "main.js",
+	"dependencies": {
+		"electron": "^8.2.5",
+		"googleapis": "^50.0.0",
+		"request": "^2.88.2"
+	},
+	"devDependencies": {},
+	"scripts": {
+		"start": "electron ."
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/fredrikj31/LectioToCal-DesktopApp.git"
+	},
+	"author": "fredrikj31",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/fredrikj31/LectioToCal-DesktopApp/issues"
+	},
+	"homepage": "https://github.com/fredrikj31/LectioToCal-DesktopApp#readme"
+}
