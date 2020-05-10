@@ -27,6 +27,7 @@ function linkCalendar() {
 	fs.readFile("./assets/data/client_secret.json", (err, content) => {
 		if (err) return console.log("Error loading client secret file:", err);
 		// Authorize a client with credentials, then call the Google Calendar API.
+		console.log("JSON" + JSON.parse(content))
 		authorize(JSON.parse(content));
 	});
 	var linkCalendarHTML = document.getElementById("connectCalendar");
@@ -88,4 +89,6 @@ function authorize(credentials) {
 		if (err) return getAccessToken(oAuth2Client);
 		oAuth2Client.setCredentials(JSON.parse(token));
 	});
+
+	console.log(oAuth2Client)
 }
