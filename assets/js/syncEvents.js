@@ -10,31 +10,37 @@ const { OAuth2 } = google.auth;
 var defaultLocation = electron.app.getPath("documents");
 
 async function setupAuth() {
-	const oAuth2Client = new OAuth2(
-		"294965687317-213bivaqe8jlsivc092d9uu626duskkt.apps.googleusercontent.com",
-		"QAnJ-iLuAgDj_fAx5uCvM_CF"
+	let auth = new OAuth2(
+		'294965687317-213bivaqe8jlsivc092d9uu626duskkt.apps.googleusercontent.com',
+		'QAnJ-iLuAgDj_fAx5uCvM_CF',
+		'urn:ietf:wg:oauth:2.0:oob'
 	);
 
 	fs.readFile(
 		defaultLocation + "\\LectioToCal\\token.json",
 		(err, result) => {
-			fileContent = JSON.parse(result);
+			var fileContent = JSON.parse(result);
 
-			oAuth2Client.setCredentials({
+			let credentials = {
+				access_token: fileContent['access_token'],
+				token_type: fileContent['token_type'], // mostly Bearer
 				refresh_token: fileContent['refresh_token'],
-			});
+				expiry_date: fileContent['expiry_date']
+			};
+
+			auth.setCredentials(credentials);
 		}
 	);
-
-	return oAuth2Client;
+	
+	return auth;
 }
 
 async function getCalendar() {
 	var authUser = await setupAuth();
 
-	var calendar = google.calendar({ version: "v3", auth: authUser });
+	console.log(authUser)
 
-	console.log(calendar);
+	var calendar = google.calendar({ version: "v3", authUser });
 
 	calendar.events.list(
 		{
