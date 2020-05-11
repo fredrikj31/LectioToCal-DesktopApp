@@ -24,7 +24,7 @@ function checkTokenFile() {
 // Overall function to link calendar
 function linkCalendar() {
 	// Getting the client secret
-	fs.readFile("./assets/data/client_secret.json", (err, content) => {
+	fs.readFile("./assets/data/credentials.json", (err, content) => {
 		if (err) return console.log("Error loading client secret file:", err);
 		// Authorize a client with credentials, then call the Google Calendar API.
 		console.log("JSON" + JSON.parse(content))

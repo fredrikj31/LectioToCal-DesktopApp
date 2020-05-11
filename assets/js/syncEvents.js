@@ -4,16 +4,14 @@ var { google } = require("googleapis");
 var electron = require("electron").remote;
 var request = require("request");
 
-const { OAuth2 } = google.auth;
-
 //Default location for folder
 var defaultLocation = electron.app.getPath("documents");
 
 async function setupAuth() {
-	let auth = new OAuth2(
-		'294965687317-213bivaqe8jlsivc092d9uu626duskkt.apps.googleusercontent.com',
-		'QAnJ-iLuAgDj_fAx5uCvM_CF',
-		'urn:ietf:wg:oauth:2.0:oob'
+	let auth = new google.auth.OAuth2(
+		"294965687317-qca0crm8d3tu78nkkreuk73sdkdgsivh.apps.googleusercontent.com",
+		"LdE_CuDQ6Mx0WLAJJOSEVOrz",
+		"urn:ietf:wg:oauth:2.0:oob"
 	);
 
 	fs.readFile(
@@ -21,27 +19,43 @@ async function setupAuth() {
 		(err, result) => {
 			var fileContent = JSON.parse(result);
 
-			let credentials = {
-				access_token: fileContent['access_token'],
-				token_type: fileContent['token_type'], // mostly Bearer
-				refresh_token: fileContent['refresh_token'],
-				expiry_date: fileContent['expiry_date']
-			};
+			/*let credentials = {
+				access_token: fileContent["access_token"],
+				refresh_token: fileContent["refresh_token"],
+				token_type: fileContent["access_token"],
+				scope: fileContent["access_token"],
+			};*/
 
-			auth.setCredentials(credentials);
+			auth.setCredentials(JSON.parse(result));
 		}
 	);
-	
+
 	return auth;
 }
 
-async function getCalendar() {
-	var authUser = await setupAuth();
+function authorize(callback) {
+	const oAuth2Client = new google.auth.OAuth2("294965687317-qca0crm8d3tu78nkkreuk73sdkdgsivh.apps.googleusercontent.com", "LdE_CuDQ6Mx0WLAJJOSEVOrz", "urn:ietf:wg:oauth:2.0:oob");
 
-	console.log(authUser)
+	// Load client secrets from a local file.
+	const content = fs.readFileSync("./assets/data/credentials.json", "utf8");
+	const credentials = JSON.parse(content);
+	console.log(credentials)
+	// Check if we have previously stored a token.
+	fs.readFile(defaultLocation + "\\LectioToCal\\token.json", (err, token) => {
+		if (err) return getAccessToken(oAuth2Client, callback);
+		oAuth2Client.setCredentials(JSON.parse(token));
+		callback(oAuth2Client);
+	});
+}
 
-	var calendar = google.calendar({ version: "v3", authUser });
+function getEvents() {
+	authorize((auth) => {
+		listEventsFunc(auth);
+	});
+}
 
+function listEventsFunc(auth) {
+	const calendar = google.calendar({ version: "v3", auth });
 	calendar.events.list(
 		{
 			calendarId: "primary",
@@ -51,9 +65,7 @@ async function getCalendar() {
 			orderBy: "startTime",
 		},
 		(err, res) => {
-			if (err) {
-				return console.log("The API returned an error: " + err);
-			}
+			if (err) return console.log("The API returned an error: " + err);
 			const events = res.data.items;
 			if (events.length) {
 				console.log("Upcoming 10 events:");
