@@ -55,6 +55,70 @@ function authorize(callback) {
 	});
 }
 
+function createCalendarFunc() {
+	return new Promise(function(resolve, reject) {
+		authorize((auth) => {
+			const calendar = google.calendar({ version: "v3", auth });
+			calendar.calendars.insert({summary: "LectioToCal"}, (err, result) => {
+				if (err) {
+					console.log("The API returned an error: " + err);
+					reject("error");
+				} else {
+					console.log(result);
+					resolve(result);
+				}
+			})
+		});
+	});
+}
+
+async function runMe() {
+	var result = await getCalendarIdFunc().then((result) => {
+		console.log(result)
+		return result
+	}).catch((error) => {
+		console.log("There was an error: " + error);
+		return error
+	})
+
+	console.log("The result line: " + result)
+}
+
+/*
+https://softwareengineering.stackexchange.com/questions/279898/how-do-i-make-a-javascript-promise-return-something-other-than-a-promise
+*/
+function getCalendarIdFunc() {
+	return new Promise(function(resolve, reject) {
+		authorize((auth) => {
+			const calendar = google.calendar({ version: "v3", auth });
+			calendar.calendarList.list({}, (err, result) => {
+				if (err) {
+					//console.log("The API returned an error: " + err);
+					reject(505);
+				}
+	
+				//console.log(result);
+				var found = false;
+				result.data.items.forEach((element) => {
+					if (element.summary == "LectioToCal") {
+						//console.log("Found it: " + element.id);
+	
+						var calendarId = element.id;
+						//console.log(calendarId);
+						found = true;
+						resolve(calendarId);
+					}
+				});
+
+				if (!found) {
+					//console.log("Could not find the calendar")
+					reject(404);
+				}
+			});
+		});
+	})
+}
+
 function getEvents() {
 	authorize((auth) => {
 		const calendar = google.calendar({ version: "v3", auth });
