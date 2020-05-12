@@ -1,94 +1,88 @@
 // Packages
 var fs = require("fs");
 var { google } = require("googleapis");
+const { OAuth2 } = google.auth;
 var electron = require("electron").remote;
 var request = require("request");
 
 //Default location for folder
 var defaultLocation = electron.app.getPath("documents");
 
-async function setupAuth() {
-	let auth = new google.auth.OAuth2(
+function setupAuth() {
+	// Create a new instance of oAuth and set our Client ID & Client Secret.
+	const oAuth2Client = new OAuth2(
 		"294965687317-qca0crm8d3tu78nkkreuk73sdkdgsivh.apps.googleusercontent.com",
-		"LdE_CuDQ6Mx0WLAJJOSEVOrz",
-		"urn:ietf:wg:oauth:2.0:oob"
+		"LdE_CuDQ6Mx0WLAJJOSEVOrz"
 	);
 
-	fs.readFile(
-		defaultLocation + "\\LectioToCal\\token.json",
-		(err, result) => {
-			var fileContent = JSON.parse(result);
+	var contents = fs.readFileSync(defaultLocation + "/LectioToCal/token.json", 'utf8');
 
-			/*let credentials = {
-				access_token: fileContent["access_token"],
-				refresh_token: fileContent["refresh_token"],
-				token_type: fileContent["access_token"],
-				scope: fileContent["access_token"],
-			};*/
+	//console.log(JSON.parse(contents)['refresh_token'])
 
-			auth.setCredentials(JSON.parse(result));
-		}
-	);
+	oAuth2Client.setCredentials({
+		refresh_token: JSON.parse(contents)['refresh_token']
+	});
 
-	return auth;
+	return oAuth2Client;
 }
 
-function authorize(callback) {
-	const oAuth2Client = new google.auth.OAuth2(
-		"294965687317-qca0crm8d3tu78nkkreuk73sdkdgsivh.apps.googleusercontent.com",
-		"LdE_CuDQ6Mx0WLAJJOSEVOrz",
-		"urn:ietf:wg:oauth:2.0:oob"
-	);
+async function createCalendar() {
+	var result = await createCalendarFunc()
+		.then((result) => {
+			console.log(result);
+			return result;
+		})
+		.catch((error) => {
+			console.log("There was an error: " + error);
+			return error;
+		});
 
-	/* OLD CODE (NO NEED)
-	// Load client secrets from a local file.
-	// const content = fs.readFileSync("./assets/data/credentials.json", "utf8");
-	// const credentials = JSON.parse(content);
-	// console.log(credentials)
-	*/
-
-	// Check if we have previously stored a token.
-	fs.readFile(defaultLocation + "\\LectioToCal\\token.json", (err, token) => {
-		if (err) return getAccessToken(oAuth2Client, callback);
-		oAuth2Client.setCredentials(JSON.parse(token));
-		callback(oAuth2Client);
-	});
+	console.log("Calendar Id: " + result);
+	return result;
 }
 
 function createCalendarFunc() {
-	return new Promise(function(resolve, reject) {
+	return new Promise(function (resolve, reject) {
 		authorize((auth) => {
 			const calendar = google.calendar({ version: "v3", auth });
-			calendar.calendars.insert({summary: "LectioToCal"}, (err, result) => {
-				if (err) {
-					console.log("The API returned an error: " + err);
-					reject("error");
-				} else {
-					console.log(result);
-					resolve(result);
+			calendar.calendars.insert(
+				{
+					summary: "LectioToCal",
+				},
+				(err, result) => {
+					if (err) {
+						console.log("The API returned an error: " + err);
+						reject("error");
+					} else {
+						console.log(result);
+						resolve(result);
+					}
 				}
-			})
+			);
 		});
 	});
 }
 
-async function runMe() {
-	var result = await getCalendarIdFunc().then((result) => {
-		console.log(result)
-		return result
-	}).catch((error) => {
-		console.log("There was an error: " + error);
-		return error
-	})
+async function getCalendarId() {
+	var result = await getCalendarIdFunc()
+		.then((result) => {
+			console.log(result);
+			return result;
+		})
+		.catch((error) => {
+			console.log("There was an error: " + error);
+			return error;
+		});
 
-	console.log("The result line: " + result)
+	console.log("Calendar Id: " + result);
+	return result;
 }
 
 /*
 https://softwareengineering.stackexchange.com/questions/279898/how-do-i-make-a-javascript-promise-return-something-other-than-a-promise
 */
 function getCalendarIdFunc() {
-	return new Promise(function(resolve, reject) {
+	return new Promise(function (resolve, reject) {
 		authorize((auth) => {
 			const calendar = google.calendar({ version: "v3", auth });
 			calendar.calendarList.list({}, (err, result) => {
@@ -96,13 +90,13 @@ function getCalendarIdFunc() {
 					//console.log("The API returned an error: " + err);
 					reject(505);
 				}
-	
+
 				//console.log(result);
 				var found = false;
 				result.data.items.forEach((element) => {
 					if (element.summary == "LectioToCal") {
 						//console.log("Found it: " + element.id);
-	
+
 						var calendarId = element.id;
 						//console.log(calendarId);
 						found = true;
@@ -116,7 +110,7 @@ function getCalendarIdFunc() {
 				}
 			});
 		});
-	})
+	});
 }
 
 function getEvents() {
@@ -250,48 +244,31 @@ function grabCalendar() {}
 
 function checkEvents(auth) {}
 
-function insertEvents(auth) {
-	const calendar = google.calendar({ version: "v3", auth });
-	var event = {
-		summary: "Google I/O 2019",
-		location: "800 Howard St.",
-		description: "A chance to hear more.",
-		start: {
-			dateTime: "2019-11-28T09:00:00-07:00",
-			timeZone: "America/Los_Angeles",
-		},
-		end: {
-			dateTime: "2019-11-28T10:00:00-07:00",
-			timeZone: "America/Los_Angeles",
-		},
-		recurrence: ["RRULE:FREQ=DAILY;COUNT=2"],
-		attendees: [
-			{ email: "lpage@example.com" },
-			{ email: "sbrin@example.com" },
-		],
-		reminders: {
-			useDefault: false,
-			overrides: [
-				{ method: "email", minutes: 24 * 60 },
-				{ method: "popup", minutes: 10 },
-			],
-		},
-	};
+function listEvents() {
+	const calendar = google.calendar({ version: "v3", auth: setupAuth() });
 
-	calendar.events.insert(
+	calendar.events.list(
 		{
-			auth: auth,
 			calendarId: "primary",
-			resource: event,
+			timeMin: new Date().toISOString(),
+			maxResults: 10,
+			singleEvents: true,
+			orderBy: "startTime",
 		},
-		function (err, event) {
-			if (err) {
-				console.log(
-					"There was an error contacting the Calendar service: " + err
-				);
-				return;
+		(err, res) => {
+			if (err) return console.log("The API returned an error: " + err);
+			const events = res.data.items;
+			if (events.length) {
+				console.log("Upcoming 10 events:");
+				events.map((event, i) => {
+					const start = event.start.dateTime || event.start.date;
+					console.log(`${start} - ${event.summary}`);
+				});
+			} else {
+				console.log("No upcoming events found.");
 			}
-			console.log("Event created: %s", event.data.htmlLink);
 		}
 	);
 }
+
+listEvents();
