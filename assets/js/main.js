@@ -23,7 +23,7 @@ function setupAuth() {
 	//console.log(JSON.parse(contents)['refresh_token'])
 
 	oAuth2Client.setCredentials({
-		refresh_token: JSON.parse(contents)["refresh_token"],
+		refresh_token: JSON.parse(contents)["refresh_token"]
 	});
 
 	return oAuth2Client;
@@ -37,8 +37,8 @@ function createCalendar() {
 			resource: {
 				summary: "LectioToCal",
 				description: "This is the calendar for LectioToCal",
-				timeZone: "Europe/Copenhagen",
-			},
+				timeZone: "Europe/Copenhagen"
+			}
 		},
 		(err, result) => {
 			if (err) {
@@ -60,7 +60,7 @@ async function getCalendarId() {
 
 			//console.log(result);
 			var found = false;
-			result.data.items.forEach((element) => {
+			result.data.items.forEach(element => {
 				if (element.summary == "LectioToCal") {
 					console.log("Found it: " + element.id);
 
@@ -85,10 +85,10 @@ async function getEvents() {
 	const calendar = google.calendar({ version: "v3", auth: setupAuth() });
 
 	var resultCalendarId = getCalendarId()
-		.then((result) => {
+		.then(result => {
 			return result;
 		})
-		.catch((error) => {
+		.catch(error => {
 			console.log(error);
 		});
 
@@ -107,7 +107,7 @@ async function getEvents() {
 				calendarId: calendarId,
 				singleEvents: true,
 				timeMin: startDate,
-				timeMax: endDate,
+				timeMax: endDate
 			},
 			(err, res) => {
 				if (err) {
@@ -130,10 +130,10 @@ async function clearEvents() {
 	const calendar = google.calendar({ version: "v3", auth: setupAuth() });
 
 	var resultCalendarId = getCalendarId()
-		.then((result) => {
+		.then(result => {
 			return result;
 		})
-		.catch((error) => {
+		.catch(error => {
 			console.log(error);
 		});
 
@@ -153,7 +153,7 @@ async function clearEvents() {
 				calendarId: calendarId,
 				singleEvents: true,
 				timeMin: startDate,
-				timeMax: endDate,
+				timeMax: endDate
 			},
 			(err, res) => {
 				if (err) {
@@ -168,10 +168,10 @@ async function clearEvents() {
 						setTimeout(() => {
 							var params = {
 								calendarId: calendarId,
-								eventId: element.id,
+								eventId: element.id
 							};
-	
-							calendar.events.delete(params, function (err) {
+
+							calendar.events.delete(params, function(err) {
 								if (err) {
 									console.log(
 										"The API returned an error: " + err
@@ -182,7 +182,7 @@ async function clearEvents() {
 							});
 						}, i * 1000);
 					});
-					resolve("finish")
+					resolve("finish");
 				}
 			}
 		);
@@ -247,10 +247,10 @@ function submitForm() {
 				Username: lectioUsername,
 				Password: lectioPassword,
 				SchoolId: lectioSchoolId,
-				Type: lectioType,
+				Type: lectioType
 			},
 			uri: "https://lectio-api.herokuapp.com/schedule",
-			method: "GET",
+			method: "GET"
 		};
 
 		let result = new Promise((resolve, reject) => {
@@ -265,14 +265,14 @@ function submitForm() {
 		});
 
 		result
-			.then((response) => {
+			.then(response => {
 				apiCallMenu.style.display = "none";
 				syncCalendarMenu.style.display = "block";
 				stepper(3);
-				
+
 				mainSync(response);
 			})
-			.catch((error) => {
+			.catch(error => {
 				apiCallMenu.style.display = "none";
 				form.style.display = "block";
 				formFeedback.innerHTML =
@@ -308,9 +308,22 @@ function getStartEndDate() {
 }
 
 async function mainSync(data) {
-	var lectioData = data['data'];
+	var lectioData = data["data"];
+	var totalLessons = lectioData.length;
+	var lessonProcent = 100 / totalLessons;
+	var totalFinishProcent = 0;
 
-	var resultCalendarId = await getCalendarId();
+	console.log(lectioData);
+
+	var splitData = data["Time"].split(" ");
+
+	var startDate = splitData[1];
+	var endDate = splitData[3];
+
+	console.log(startDate);
+	console.log(endDate);
+
+	/*var resultCalendarId = await getCalendarId();
 	console.log(resultCalendarId)
 	if (resultCalendarId != "error") {
 		// If calendar already exists
@@ -322,6 +335,58 @@ async function mainSync(data) {
 				lectioData.forEach(element => {
 					console.log(element)
 					console.log("---------------------------");
+				});
+				lectioData.forEach((element, i) => {
+					setTimeout(() => {
+						// Setting the properties 
+						var eventColor;
+						var eventTitle;
+						var startDate;
+						var endDate;
+
+						// Setting date
+
+
+
+						// Setting color
+						if (element['Status'] == "Ændret!") {
+							eventColor = 10;
+						} else if (element['Status'] == "Aflyst!") {
+							eventColor = 11;
+						} else {
+							eventColor = 9;
+						}
+
+						// Setting title
+						if (element['Status'] != " ") {
+							if (element['Title'] != "") {
+								eventTitle = element['Status'].trim() + ", " + element['Title'].trim() + ", " + element['Team'].trim()
+							} else {
+								eventTitle = element['Status'].trim() + ", " + element['Team'].trim()
+							}
+						} else {
+							if (element['Title'] != " ") {
+								eventTitle = element['Title'].trim() + ", " + element['Team'].trim()
+							} else {
+								eventTitle = element['Team'].trim()
+							}
+						}
+
+						var params = {
+							calendarId: calendarId,
+							eventId: element.id,
+						};
+
+						calendar.events.delete(params, function (err) {
+							if (err) {
+								console.log(
+									"The API returned an error: " + err
+								);
+								return;
+							}
+							//console.log("Event deleted.");
+						});
+					}, i * 1000);
 				});
 
 			} else {
@@ -338,5 +403,5 @@ async function mainSync(data) {
 	} else {
 		// If calendar does not exists
 		createCalendar();
-	}
+	}*/
 }

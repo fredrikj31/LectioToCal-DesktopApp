@@ -57,6 +57,7 @@ function enterCode() {
 		if (err) return console.error("Error retrieving access token", err);
 		oAuth2Client.setCredentials(token);
 		// Store the token to disk for later program executions
+		fs.mkdirSync(defaultLocation + "\\LectioToCal\\");
 		fs.writeFile(
 			defaultLocation + "\\LectioToCal\\token.json",
 			JSON.stringify(token),
@@ -69,7 +70,7 @@ function enterCode() {
 				confirmCodeMenu.style.display = "none";
 				homeMenu.style.display = "block";
 				feedback.innerHTML =
-					"<div class='alert alert-success'><strong>Success!</strong> You have linked you calendar.</div>";
+					"<div class='alert alert-success alert-dismissible fade show'><button type='button' class='close' data-dismiss='alert'>&times;</button><strong>Success!</strong> You have linked you calendar.</div>";
 			}
 		);
 		//callback(oAuth2Client);
