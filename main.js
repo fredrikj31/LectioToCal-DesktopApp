@@ -21,8 +21,6 @@ function createWindow() {
 	globalShortcut.register("CommandOrControl+Shift+R", () => {
 		console.log("Reloaded window and cleared cache.");
 		win.webContents.reload();
-
-		win.webContents.session.clearCache(function(){});
 	});
 	globalShortcut.register("CommandOrControl+Shift+X", () => {
 		console.log("Opened Developer Options");
