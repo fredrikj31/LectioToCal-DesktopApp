@@ -23,31 +23,36 @@ function setupAuth() {
 	//console.log(JSON.parse(contents)['refresh_token'])
 
 	oAuth2Client.setCredentials({
-		refresh_token: JSON.parse(contents)["refresh_token"]
+		refresh_token: JSON.parse(contents)["refresh_token"],
 	});
 
 	return oAuth2Client;
 }
 
-function createCalendar() {
+async function createCalendar() {
 	const calendar = google.calendar({ version: "v3", auth: setupAuth() });
 
-	calendar.calendars.insert(
-		{
-			resource: {
-				summary: "LectioToCal",
-				description: "This is the calendar for LectioToCal",
-				timeZone: "Europe/Copenhagen"
+	var result = new Promise((resolve, reject) => {
+		calendar.calendars.insert(
+			{
+				resource: {
+					summary: "LectioToCal",
+					description: "This is the calendar for LectioToCal",
+					timeZone: "Europe/Copenhagen",
+				},
+			},
+			(err, result) => {
+				if (err) {
+					console.log("The API returned an error: " + err);
+					reject("error")
+				} else {
+					resolve("success")
+				}
 			}
-		},
-		(err, result) => {
-			if (err) {
-				console.log("The API returned an error: " + err);
-			} else {
-				console.log(result);
-			}
-		}
-	);
+		);
+	});
+
+	return result
 }
 
 async function getCalendarId() {
@@ -60,7 +65,7 @@ async function getCalendarId() {
 
 			//console.log(result);
 			var found = false;
-			result.data.items.forEach(element => {
+			result.data.items.forEach((element) => {
 				if (element.summary == "LectioToCal") {
 					console.log("Found it: " + element.id);
 
@@ -85,10 +90,10 @@ async function getEvents() {
 	const calendar = google.calendar({ version: "v3", auth: setupAuth() });
 
 	var resultCalendarId = getCalendarId()
-		.then(result => {
+		.then((result) => {
 			return result;
 		})
-		.catch(error => {
+		.catch((error) => {
 			console.log(error);
 		});
 
@@ -107,7 +112,7 @@ async function getEvents() {
 				calendarId: calendarId,
 				singleEvents: true,
 				timeMin: startDate,
-				timeMax: endDate
+				timeMax: endDate,
 			},
 			(err, res) => {
 				if (err) {
@@ -130,10 +135,10 @@ async function clearEvents() {
 	const calendar = google.calendar({ version: "v3", auth: setupAuth() });
 
 	var resultCalendarId = getCalendarId()
-		.then(result => {
+		.then((result) => {
 			return result;
 		})
-		.catch(error => {
+		.catch((error) => {
 			console.log(error);
 		});
 
@@ -153,7 +158,7 @@ async function clearEvents() {
 				calendarId: calendarId,
 				singleEvents: true,
 				timeMin: startDate,
-				timeMax: endDate
+				timeMax: endDate,
 			},
 			(err, res) => {
 				if (err) {
@@ -168,10 +173,10 @@ async function clearEvents() {
 						setTimeout(() => {
 							var params = {
 								calendarId: calendarId,
-								eventId: element.id
+								eventId: element.id,
 							};
 
-							calendar.events.delete(params, function(err) {
+							calendar.events.delete(params, function (err) {
 								if (err) {
 									console.log(
 										"The API returned an error: " + err
@@ -186,6 +191,128 @@ async function clearEvents() {
 				}
 			}
 		);
+	});
+}
+
+async function createEvents(dataInput, calendarIdInput, totalEventsInput) {
+	const calendar = google.calendar({ version: "v3", auth: setupAuth() });
+
+	var calendarId = calendarIdInput;
+
+	var totalEvents = totalEventsInput;
+	var totalEventsProcent = 100 / totalEvents;
+	var finishProcent = 0;
+
+
+	dataInput.forEach((element, i) => {
+		setTimeout(() => {
+			// Setting the properties
+			var eventColor;
+			var eventTitle;
+			var eventStartDate;
+			var eventEndDate;
+
+			// Setting date
+			var splitData = element["Time"].split(" ");
+			var startTime = splitData[1];
+			var endTime = splitData[3];
+
+			var fullTimeYear = splitData[0].split("-")[1];
+			var fullTimeDate = splitData[0].split("-")[0];
+			var fullTimeDateReal = fullTimeDate.split("/");
+			var fullTimeDay = fullTimeDateReal[0];
+			var fullTimeMonth = fullTimeDateReal[1];
+
+			eventStartDate =
+				fullTimeYear +
+				"-" +
+				fullTimeMonth +
+				"-" +
+				fullTimeDay +
+				"T" +
+				startTime +
+				":00" +
+				"+02:00";
+			eventEndDate =
+				fullTimeYear +
+				"-" +
+				fullTimeMonth +
+				"-" +
+				fullTimeDay +
+				"T" +
+				endTime +
+				":00" +
+				"+02:00";
+
+			// Setting color
+			if (element["Status"] == "Ændret!") {
+				eventColor = 10;
+			} else if (element["Status"] == "Aflyst!") {
+				eventColor = 11;
+			} else {
+				eventColor = 9;
+			}
+
+			// Setting title
+			if (element["Status"] != " ") {
+				if (element["Title"] != " ") {
+					eventTitle = element["Status"].trim() + ", " + element["Title"].trim() + ", " + element["Team"].trim();
+				} else {
+					eventTitle = element["Status"].trim() + ", " + element["Team"].trim();
+				}
+			} else {
+				if (element["Title"] != " ") { eventTitle = element["Title"].trim() + ", " + element["Team"].trim();
+				} else {
+					eventTitle = element["Team"].trim();
+				}
+			}
+
+			var event = {
+				'summary': `${eventTitle}`,
+				'colorId': `${eventColor}`,
+				'location': `${element['Room']}`,
+				'description': `<b>Status:</b> ${element["Status"]} \n<b>Title:</b> ${element["Title"]} \n<b>Tid:</b> ${element["Time"]} \n<b>Hold:</b> ${element["Team"]} \n<b>Lærer(r):</b> ${element["Teacher"]} \n<b>Lokale:</b> ${element["Room"]}`,
+				'start': {
+					'dateTime': `${eventStartDate}`,
+				},
+				'end': {
+					'dateTime': `${eventEndDate}`,
+				},
+				'reminders': {
+					'useDefault': true,
+				},
+			};
+
+			//console.log(event)
+
+			calendar.events.insert(
+				{
+					calendarId: `${calendarId}`,
+					resource: event,
+				},
+				function (err, event) {
+					if (err) {
+						console.log(
+							"There was an error contacting the Calendar service: " +
+								err
+						);
+						return;
+					}
+					//console.log("Event created!");
+				}
+			);
+
+			finishProcent = finishProcent + totalEventsProcent;
+
+			// Animate progress bar
+			$(".progress-bar").animate({
+				width: Math.ceil(finishProcent) + "%"
+			}, 1000);
+
+			//console.log(finishProcent)
+
+
+		}, i * 2000);
 	});
 }
 
@@ -247,10 +374,10 @@ function submitForm() {
 				Username: lectioUsername,
 				Password: lectioPassword,
 				SchoolId: lectioSchoolId,
-				Type: lectioType
+				Type: lectioType,
 			},
 			uri: "https://lectio-api.herokuapp.com/schedule",
-			method: "GET"
+			method: "GET",
 		};
 
 		let result = new Promise((resolve, reject) => {
@@ -265,14 +392,14 @@ function submitForm() {
 		});
 
 		result
-			.then(response => {
+			.then((response) => {
 				apiCallMenu.style.display = "none";
 				syncCalendarMenu.style.display = "block";
 				stepper(3);
 
 				mainSync(response);
 			})
-			.catch(error => {
+			.catch((error) => {
 				apiCallMenu.style.display = "none";
 				form.style.display = "block";
 				formFeedback.innerHTML =
@@ -310,98 +437,27 @@ function getStartEndDate() {
 async function mainSync(data) {
 	var lectioData = data["data"];
 	var totalLessons = lectioData.length;
-	var lessonProcent = 100 / totalLessons;
-	var totalFinishProcent = 0;
 
-	console.log(lectioData);
-
-	var splitData = data["Time"].split(" ");
-
-	var startDate = splitData[1];
-	var endDate = splitData[3];
-
-	console.log(startDate);
-	console.log(endDate);
-
-	/*var resultCalendarId = await getCalendarId();
-	console.log(resultCalendarId)
+	var resultCalendarId = await getCalendarId();
+	console.log(resultCalendarId);
 	if (resultCalendarId != "error") {
 		// If calendar already exists
 		var resultEventsList = await getEvents();
-		console.log(resultEventsList)
+		console.log(resultEventsList);
 		if (resultEventsList != "error") {
 			if (resultEventsList < 1) {
 				// If events is empty
-				lectioData.forEach(element => {
-					console.log(element)
-					console.log("---------------------------");
-				});
-				lectioData.forEach((element, i) => {
-					setTimeout(() => {
-						// Setting the properties 
-						var eventColor;
-						var eventTitle;
-						var startDate;
-						var endDate;
-
-						// Setting date
-
-
-
-						// Setting color
-						if (element['Status'] == "Ændret!") {
-							eventColor = 10;
-						} else if (element['Status'] == "Aflyst!") {
-							eventColor = 11;
-						} else {
-							eventColor = 9;
-						}
-
-						// Setting title
-						if (element['Status'] != " ") {
-							if (element['Title'] != "") {
-								eventTitle = element['Status'].trim() + ", " + element['Title'].trim() + ", " + element['Team'].trim()
-							} else {
-								eventTitle = element['Status'].trim() + ", " + element['Team'].trim()
-							}
-						} else {
-							if (element['Title'] != " ") {
-								eventTitle = element['Title'].trim() + ", " + element['Team'].trim()
-							} else {
-								eventTitle = element['Team'].trim()
-							}
-						}
-
-						var params = {
-							calendarId: calendarId,
-							eventId: element.id,
-						};
-
-						calendar.events.delete(params, function (err) {
-							if (err) {
-								console.log(
-									"The API returned an error: " + err
-								);
-								return;
-							}
-							//console.log("Event deleted.");
-						});
-					}, i * 1000);
-				});
-
+				createEvents(lectioData, resultCalendarId, totalLessons)
 			} else {
 				// If events already exists
-				var resultClearCalendar = await clearCalendarId();
+				var resultClearCalendar = await clearEvents();
 
-				lectioData.forEach(element => {
-					console.log(element)
-					console.log("---------------------------");
-				});
-
+				createEvents(lectioData, resultCalendarId, totalLessons)
 			}
 		}
 	} else {
 		// If calendar does not exists
-		createCalendar();
-	}*/
+		var resultCreateCalendar = await createCalendar();
+		createEvents(lectioData, resultCalendarId, totalLessons)
+	}
 }

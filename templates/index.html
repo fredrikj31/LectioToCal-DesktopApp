@@ -8,7 +8,6 @@
 	<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
 
 	<!-- Bootstrap CSS -->
-	<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">-->
 	<link rel="stylesheet" href="../assets/libraries/bootstrap.css">
 
 	<link rel="stylesheet" href="../assets/css/style.css">
@@ -131,7 +130,7 @@
 					<br>
 					<div class="progress" style="height:30px">
 						<div class="progress-bar progress-bar-striped progress-bar-animated bg-info"
-							style="width:30%; height:30px; font-size: 16px;">30%</div>
+							style="width:0%; height:30px; font-size: 16px;"></div>
 					</div>
 				</div>
 				<div class="col-sm-3"></div>
@@ -148,8 +147,19 @@
 		</div>
 	</footer>
 
-	<!-- Bootstrap JS -->
+	<script>
+		if (typeof module === 'object') {
+			window.module = module; module = undefined;
+		}
+	</script>
+
+	<!-- JQuery -->
 	<script src="../assets/libraries/jquery.js"></script>
+	<script>
+		try {
+			$ = jQuery = module.exports;
+		} catch (e) { }
+	</script>
 
 	<!-- Google Auth (MUST BE THE FIRST) -->
 	<script src="../assets/js/googleAuth.js"></script>
@@ -157,6 +167,13 @@
 	<script src="../assets/js/main.js"></script>
 	<!-- Get Schools -->
 	<script src="../assets/js/getSchools.js"></script>
+
+	<!-- Must be the last line -->
+	<script>
+		if (window.module) {
+			module = window.module;
+		}
+	</script>
 </body>
 
 </html>
