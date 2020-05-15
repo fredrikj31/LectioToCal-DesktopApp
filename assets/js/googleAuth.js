@@ -70,7 +70,7 @@ function enterCode() {
 				confirmCodeMenu.style.display = "none";
 				homeMenu.style.display = "block";
 				feedback.innerHTML =
-					"<div class='alert alert-success alert-dismissible fade show'><button type='button' class='close' data-dismiss='alert'>&times;</button><strong>Success!</strong> You have linked you calendar.</div>";
+					"<div class='alert alert-success'><strong>Success!</strong> You have linked you calendar.</div>";
 			}
 		);
 		//callback(oAuth2Client);

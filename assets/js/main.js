@@ -197,12 +197,19 @@ async function clearEvents() {
 async function createEvents(dataInput, calendarIdInput, totalEventsInput) {
 	const calendar = google.calendar({ version: "v3", auth: setupAuth() });
 
+	var mainMenu = document.getElementById("loginForm");
+	var mainMenuFeedback = document.getElementById("feedback");
+	var calendarSyncMenu = document.getElementById("calendarLoading")
+	var form = document.getElementById("submitForm");
+
 	var calendarId = calendarIdInput;
 
 	var totalEvents = totalEventsInput;
 	var totalEventsProcent = 100 / totalEvents;
 	var finishProcent = 0;
+	var finishLessons = 1;
 
+	var progressTitle = document.getElementById("progressTitle");
 
 	dataInput.forEach((element, i) => {
 		setTimeout(() => {
@@ -307,13 +314,33 @@ async function createEvents(dataInput, calendarIdInput, totalEventsInput) {
 			// Animate progress bar
 			$(".progress-bar").animate({
 				width: Math.ceil(finishProcent) + "%"
-			}, 1000);
+			}, 500);
+
+			progressTitle.innerHTML = "Processing " + finishLessons + " of " + totalEvents + " lessons " + `(${Math.ceil(finishProcent)}%)`;
+
+			finishLessons = finishLessons + 1;
 
 			//console.log(finishProcent)
 
+			if (finishLessons-1 >= dataInput.length) {
+				calendarSyncMenu.style.display = "none";
+				mainMenu.style.display = "block"
+				form.style.display = "block"
+
+				//Empty the inputs
+				document.getElementById("username").value = "";
+				document.getElementById("password").value = "";
+
+				stepper(1)
+			
+				mainMenuFeedback.innerHTML = "<div class='alert alert-success'><strong>Success!</strong> Your Lectio schedule is now synced with your Google Calendar.</div>"
+			}
 
 		}, i * 2000);
+
+
 	});
+
 }
 
 function stepper(number) {
