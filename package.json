@@ -1,5 +1,5 @@
 {
-	"name": "lectiotocal-desktopapp",
+	"name": "LectioToCal",
 	"version": "1.0.0",
 	"description": "A desktop application that allows you to get your lectio schedule to google calendar",
 	"main": "main.js",

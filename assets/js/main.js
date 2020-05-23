@@ -420,20 +420,33 @@ function submitForm() {
 
 		result
 			.then((response) => {
-				apiCallMenu.style.display = "none";
-				syncCalendarMenu.style.display = "block";
-				stepper(3);
+				console.log(response)
 
-				mainSync(response);
+				if (response['message'] == "Success") {
+					apiCallMenu.style.display = "none";
+					syncCalendarMenu.style.display = "block";
+					stepper(3);
+		
+					mainSync(response);
+				} else {
+					apiCallMenu.style.display = "none";
+					form.style.display = "block";
+					formFeedback.innerHTML =
+						"<div class='alert alert-danger'><strong>Wrong Details!</strong> Please check your login details.</div>";
+					stepper(1);
+				}
+
+
 			})
 			.catch((error) => {
+				console.log(error)
 				apiCallMenu.style.display = "none";
 				form.style.display = "block";
 				formFeedback.innerHTML =
-					"<div class='alert alert-danger'><strong>Error!</strong> Please send a support ticket with this code: " +
+					"<div class='alert alert-danger'><strong>Error!</strong> Check your details. If is continues to break please send a support ticket with this code: " +
 					error +
 					"</div>";
-				stepper(4);
+				stepper(1);
 			});
 	}
 }
