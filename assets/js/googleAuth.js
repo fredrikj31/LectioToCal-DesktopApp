@@ -24,12 +24,11 @@ function checkTokenFile() {
 // Overall function to link calendar
 function linkCalendar() {
 	// Getting the client secret
-	fs.readFile("./assets/data/credentials.json", (err, content) => {
-		if (err) return console.log("Error loading client secret file:", err);
-		// Authorize a client with credentials, then call the Google Calendar API.
-		console.log("JSON" + JSON.parse(content))
-		authorize(JSON.parse(content));
-	});
+	var credentials = {"installed":{"client_id":"294965687317-qca0crm8d3tu78nkkreuk73sdkdgsivh.apps.googleusercontent.com","project_id":"lectiotocal","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"LdE_CuDQ6Mx0WLAJJOSEVOrz","redirect_uris":["urn:ietf:wg:oauth:2.0:oob","http://localhost"]}}
+
+	console.log("JSON" + credentials)
+	authorize(credentials);
+
 	var linkCalendarHTML = document.getElementById("connectCalendar");
 	var confirmCode = document.getElementById("codeForm");
 	linkCalendarHTML.style.display = "none";
