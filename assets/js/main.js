@@ -11,8 +11,8 @@ var defaultLocation = electron.app.getPath("documents");
 function setupAuth() {
 	// Create a new instance of oAuth and set our Client ID & Client Secret.
 	const oAuth2Client = new OAuth2(
-		"294965687317-qca0crm8d3tu78nkkreuk73sdkdgsivh.apps.googleusercontent.com",
-		"LdE_CuDQ6Mx0WLAJJOSEVOrz"
+		//Client Id,
+		//Client Secret
 	);
 
 	var contents = fs.readFileSync(
