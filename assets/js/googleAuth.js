@@ -24,7 +24,7 @@ function checkTokenFile() {
 // Overall function to link calendar
 function linkCalendar() {
 	// Getting the client secret
-	var credentials = // Your credentials Here :3
+	var credentials = // Client Credentials
 
 	console.log("JSON" + credentials)
 	authorize(credentials);
