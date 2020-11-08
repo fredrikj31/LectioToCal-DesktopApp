@@ -11,8 +11,8 @@ var defaultLocation = electron.app.getPath("documents");
 function setupAuth() {
 	// Create a new instance of oAuth and set our Client ID & Client Secret.
 	const oAuth2Client = new OAuth2(
-		// Client Id,
-		//Client Secret :3
+		// Client Id
+		// Client Token
 	);
 
 	var contents = fs.readFileSync(
@@ -238,8 +238,8 @@ async function createEvents(dataInput, calendarIdInput, totalEventsInput) {
 				fullTimeDay +
 				"T" +
 				startTime +
-				":00" +
-				"+02:00";
+				":00"
+				//"+0" + timeOffset + ":00";
 			eventEndDate =
 				fullTimeYear +
 				"-" +
@@ -248,8 +248,8 @@ async function createEvents(dataInput, calendarIdInput, totalEventsInput) {
 				fullTimeDay +
 				"T" +
 				endTime +
-				":00" +
-				"+02:00";
+				":00"
+				//"+0" + timeOffset + ":00";
 
 			// Setting color
 			if (element["Status"] == "Ændret!") {
@@ -281,9 +281,11 @@ async function createEvents(dataInput, calendarIdInput, totalEventsInput) {
 				'description': `<b>Status:</b> ${element["Status"]} \n<b>Title:</b> ${element["Title"]} \n<b>Tid:</b> ${element["Time"]} \n<b>Hold:</b> ${element["Team"]} \n<b>Lærer(r):</b> ${element["Teacher"]} \n<b>Lokale:</b> ${element["Room"]}`,
 				'start': {
 					'dateTime': `${eventStartDate}`,
+					'timeZone': 'Europe/Copenhagen',
 				},
 				'end': {
 					'dateTime': `${eventEndDate}`,
+					'timeZone': 'Europe/Copenhagen',
 				},
 				'reminders': {
 					'useDefault': true,

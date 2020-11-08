@@ -18,14 +18,14 @@ function createWindow() {
 	win.removeMenu();
 
 	// Developer Shortcuts
-	globalShortcut.register("CommandOrControl+Shift+R", () => {
+	/*globalShortcut.register("CommandOrControl+Shift+R", () => {
 		console.log("Reloaded window and cleared cache.");
 		win.webContents.reload();
 	});
 	globalShortcut.register("CommandOrControl+Shift+X", () => {
 		console.log("Opened Developer Options");
 		win.webContents.openDevTools();
-	});
+	});*/
 }
 
 // This method will be called when Electron has finished
